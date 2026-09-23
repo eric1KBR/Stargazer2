@@ -4,7 +4,11 @@
 import os
 
 # --- アプリケーション情報 ---
-APP_TITLE = "Stargazer2 260923"
+APP_TITLE = "Stargazer2 260923(1)"
+
+# --- 通信・リトライ設定 ---
+MAX_API_RETRIES = 2        # 失敗時の最大再試行回数（計3回試行）
+RETRY_DELAY_SEC = 2.0      # 再試行前の待機時間（秒）
 
 # --- ファイルパス (codesフォルダー内) ---
 CODES_DIR = os.path.abspath(os.path.dirname(__file__))

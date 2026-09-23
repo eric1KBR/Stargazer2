@@ -1,5 +1,5 @@
-# Stargazer2 260923
-# コミットメッセージ: Stargazer2初期実装（標高別雲量判定、風・霧警告、全データ保存、地点管理ダイアログ、表示切替高速化、codesフォルダー構成化）
+# Stargazer2 260923(1)
+# コミットメッセージ: 通信タイムアウト時の再送信（最大2回リトライ）および通信エラー中断ダイアログの実装
 
 import tkinter as tk
 from tkinter import ttk, messagebox
@@ -14,7 +14,8 @@ sys.path.insert(0, os.path.dirname(__file__))
 
 from codes.config import (
     APP_TITLE, COLORS, LOCATIONS_FILE, WEATHER_FILE, APP_CONFIG_FILE,
-    DEFAULT_ELEVATION_THRESHOLD, DEFAULT_WIND_THRESHOLD
+    DEFAULT_ELEVATION_THRESHOLD, DEFAULT_WIND_THRESHOLD,
+    MAX_API_RETRIES, RETRY_DELAY_SEC
 )
 from codes.models import Location, CellPrecomputed
 from codes.storage import (
@@ -291,19 +292,43 @@ class StarGazer2App:
                 if self.cancel_fetch_flag:
                     break
 
-                # 進捗ステータス通知
-                self.root.after(
-                    0, self.status_lbl.config,
-                    {"text": f"取得中 ({idx+1}/{total}): {loc.name}...", "foreground": COLORS["accent"]}
-                )
+                hourly_records = None
+                # 初回取得 + 最大 MAX_API_RETRIES 回の再試行
+                for attempt in range(MAX_API_RETRIES + 1):
+                    if self.cancel_fetch_flag:
+                        break
 
-                hourly_records = fetch_location_weather(loc.lat, loc.lng, loc.elevation)
-                if hourly_records:
-                    new_data_map[loc.id] = hourly_records
-                    for t_iso in hourly_records.keys():
-                        all_times_set.add(t_iso)
-                else:
-                    print(f"Failed to fetch data for {loc.name}")
+                    if attempt == 0:
+                        status_msg = f"取得中 ({idx+1}/{total}): {loc.name}..."
+                        status_col = COLORS["accent"]
+                    else:
+                        status_msg = f"再試行中 ({attempt}/{MAX_API_RETRIES}): {loc.name}..."
+                        status_col = COLORS["status_fair"]
+                        time.sleep(RETRY_DELAY_SEC)
+
+                    self.root.after(
+                        0, self.status_lbl.config,
+                        {"text": status_msg, "foreground": status_col}
+                    )
+
+                    hourly_records = fetch_location_weather(loc.lat, loc.lng, loc.elevation)
+                    if hourly_records:
+                        break
+                    else:
+                        print(f"[{loc.name}] 取得失敗 (試行 {attempt + 1}/{MAX_API_RETRIES + 1})")
+
+                if self.cancel_fetch_flag:
+                    break
+
+                # 2回再送信（計3回試行）しても回答が得られなかった場合
+                if not hourly_records:
+                    print(f"Communication error: Failed to get data for {loc.name} after retries.")
+                    self.root.after(0, self.handle_connection_error, loc.name)
+                    return
+
+                new_data_map[loc.id] = hourly_records
+                for t_iso in hourly_records.keys():
+                    all_times_set.add(t_iso)
 
                 # API負荷軽減のウェイト
                 time.sleep(0.3)
@@ -330,16 +355,25 @@ class StarGazer2App:
             print(f"Fetch Error: {e}")
             self.root.after(0, self.finish_fetch, "エラー発生")
 
+    def handle_connection_error(self, loc_name: str):
+        self.finish_fetch("通信エラーにより中止")
+        messagebox.showerror(
+            "通信エラー",
+            f"「{loc_name}」の気象データ取得においてタイムアウトが発生し、再送信を2回試行しましたが応答が得られませんでした。\n\n"
+            "通信状況またはAPIサーバーの状態を確認の上、時間をおいて再度お試しください。"
+        )
+
     def finish_fetch(self, msg: str):
         self.is_fetching = False
         self.update_btn.config(text="更新", style="Accent.TButton", state="normal")
-        self.status_lbl.config(text=msg, foreground=COLORS["text"])
+        fg_col = COLORS["danger"] if ("エラー" in msg or "中止" in msg) else COLORS["text"]
+        self.status_lbl.config(text=msg, foreground=fg_col)
 
         if msg == "更新完了":
             self.update_last_updated_display()
             self.rebuild_cache_and_render()
 
-        self.root.after(3500, lambda: self.status_lbl.config(text=""))
+        self.root.after(4000, lambda: self.status_lbl.config(text=""))
 
     def update_last_updated_display(self):
         updated_at = self.weather_data.get("updated_at")
