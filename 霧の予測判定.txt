@@ -1,0 +1,36 @@
+霧の予測判定
+
+最低限の霧リスク判定
+取得後、時刻ごとに次を計算します。
+
+露点差 = 𝑇2𝑚 − 𝑇𝑑,2𝑚
+ 
+Pythonでの判定例です。
+
+python
+spread = temperature_2m - dew_point_2m
+
+fog_risk = (
+    spread <= 1.5
+    and relative_humidity_2m >= 92
+    and wind_speed_10m <= 2.0
+)
+より安全寄りに、次の3段階に分類するのがおすすめです。
+
+python
+spread = temperature_2m - dew_point_2m
+
+if spread <= 1.0 and relative_humidity_2m >= 95 and wind_speed_10m <= 2.0:
+    fog_level = "高"
+elif spread <= 2.0 and relative_humidity_2m >= 90 and wind_speed_10m <= 3.0:
+    fog_level = "中"
+elif spread <= 3.0 or relative_humidity_2m >= 85:
+    fog_level = "低（結露注意）"
+else:
+    fog_level = "低"
+判定の意味
+霧リスク高：気温と露点がほぼ一致し、湿度が飽和近く、弱風。谷底・湖畔・河川沿い・盆地底では霧や低層雲になりやすい状態です。
+
+霧リスク中：あと少し冷えれば飽和する状態。夜間の放射冷却、雨上がり、湿原・ダム湖・沢沿いなら警戒します。
+
+結露注意：霧になるほどではなくても、鏡筒・レンズ・結露防止ヒーターの準備が必要になり得ます。

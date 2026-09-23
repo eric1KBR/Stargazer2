@@ -1,0 +1,22 @@
+Openmeteoからの情報取得内容
+
+取得するデータ
+10日分の１時間ごとのデータ
+
+API変数	内容	天体撮影・霧判定での用途
+cloud_cover	総雲量（%）	星空がどの程度開けるかの基本指標
+cloud_cover_low	低層雲・霧、地上〜約3 km（%）	谷霧、層雲、山のガスの警戒
+cloud_cover_mid	中層雲、約3〜8 km（%）	星野・対象方向を広く遮る雲の確認
+cloud_cover_high	高層雲、約8 km以上（%）	薄雲による天の川・星雲のコントラスト低下を警戒
+temperature_2m	2 m気温（°C）	露点差、冷え込み、霜・結露判断
+dew_point_2m	2 m露点温度（°C）	霧・結露リスクの中心指標
+relative_humidity_2m	2 m相対湿度（%）	飽和へ近づく状況の確認
+wind_speed_10m	10 m風速（m/s）	放射霧では弱風が危険、赤道儀の風対策にも利用
+wind_direction_10m	10 m風向（°）	谷風・風上からの雲流入の確認
+precipitation	前1時間の降水量（mm）	雨上がりの高湿度・霧化、機材保護の確認
+
+
+例として、緯度36.2000°、経度137.9600°、標高1,500 mの場合です。
+
+text
+https://api.open-meteo.com/v1/jma?latitude=36.2000&longitude=137.9600&elevation=1500&hourly=cloud_cover,cloud_cover_low,cloud_cover_mid,cloud_cover_high,temperature_2m,dew_point_2m,relative_humidity_2m,wind_speed_10m,wind_direction_10m,precipitation&timezone=Asia%2FTokyo&wind_speed_unit=ms&forecast_days=10

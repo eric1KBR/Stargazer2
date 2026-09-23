@@ -1,0 +1,169 @@
+標高別の雲量重みづけ
+
+標高の基準を設定（デフォルト：1500mm）
+
+
+判定を３色で表示する。良：青、可：黄、不可：グレー（色の詳細は前のバージョンを確認）
+
+判定方法：
+
+設定値（1500m） 未満：雲の総量で判定。
+０～３０％：良
+３０～５０：可
+５０以上：不可
+
+
+設定値（1500m） 以上：高僧と中層の雲量を重視して判定
+
+判定方法は以下を検討（以下の記述でGreen=良、Yellow=可、Red=不可の意味）
+
+3段階なら、低層雲が眼下にある前提で、中層・高層雲のランダム重なり合成値を「上空雲量」として使うのが、単純で一貫した判定になります。
+
+𝐶
+a
+l
+o
+f
+t
+=
+100
+[
+1
+−
+(
+1
+−
+𝐶
+m
+i
+d
+100
+)
+(
+1
+−
+𝐶
+h
+i
+g
+h
+100
+)
+]
+C 
+aloft
+​
+ =100[1−(1− 
+100
+C 
+mid
+​
+ 
+​
+ )(1− 
+100
+C 
+high
+​
+ 
+​
+ )]
+これは「中層と高層が独立に配置される」と仮定したときに、少なくともどちらかの雲が視線上にある割合です。層間雲の重なりを扱う代表的な近似で、単純加算より過大になりにくく、最大値だけよりは慎重な値になります。
+
+基本の色判定
+python
+mid = cloud_cover_mid
+high = cloud_cover_high
+
+aloft_cloud = 100 * (1 - (1 - mid / 100) * (1 - high / 100))
+
+if aloft_cloud < 30:
+    sky_status = "Green"
+elif aloft_cloud < 50:
+    sky_status = "Yellow"
+else:
+    sky_status = "Red"
+境界値の扱いを明確に書くなら、以下です。
+
+python
+if 0 <= aloft_cloud < 30:
+    sky_status = "Green"
+elif 30 <= aloft_cloud < 50:
+    sky_status = "Yellow"
+else:  # 50 <= aloft_cloud <= 100
+    sky_status = "Red"
+上空雲量 aloft_cloud	表示	意味
+0〜30%未満	Green	上空は比較的開ける予報。星空撮影の有望候補
+30〜50%未満	Yellow	雲間・条件付き。星景や明るい対象なら狙える可能性
+50%以上	Red	上空雲が多い予報。星空観測・長時間撮影には不利
+高層雲の単独チェック
+この合成値だけでは、薄い高層雲の画質悪化を過小評価する場合があります。天の川、散光星雲、銀河などの撮影を重視するなら、高層雲量単独の上限を追加してください。
+
+最初は、次のような条件が実用的です。
+
+python
+mid = cloud_cover_mid
+high = cloud_cover_high
+
+aloft_cloud = 100 * (1 - (1 - mid / 100) * (1 - high / 100))
+
+if aloft_cloud >= 50 or high >= 50:
+    sky_status = "Red"
+elif aloft_cloud >= 30 or high >= 30:
+    sky_status = "Yellow"
+else:
+    sky_status = "Green"
+このルールの意味は次の通りです。
+
+aloft_cloud >= 50：中高層を合成すると、空の半分以上が雲の可能性 → Red
+
+high >= 50：高層雲だけで半分以上。星が見えても透明度・コントラスト悪化を警戒 → Red
+
+aloft_cloud >= 30：中高層の合成で3割以上 → Yellow
+
+high >= 30：高層雲が3割以上。ディープスカイ・天の川には注意 → Yellow
+
+それ以外 → Green
+
+判定例
+中層	高層	合成上空雲量	色	判断の理由
+10%	10%	19%	Green	上空の雲は少ない
+25%	10%	32.5%	Yellow	中層雲があり、合成値が30%超
+5%	35%	38.3%	Yellow	高層薄雲が多め
+40%	15%	49.0%	Yellow	半分近くが上空雲の可能性
+35%	35%	57.8%	Red	中高層の合成で半分超
+15%	55%	61.8%	Red	高層雲単独でも50%超
+低層雲の扱い
+この色はあくまで、「低層雲が撮影地点より下にある」と仮定した上空の星空品質です。従って、色判定とは別に、低層雲が観測地を覆う可能性を別フラグにしてください。
+
+例えば、霧・ガス警戒として次を併記します。
+
+python
+spread = temperature_2m - dew_point_2m
+
+low_cloud_fog_risk = (
+    cloud_cover_low >= 50
+    and spread <= 2.0
+    and relative_humidity_2m >= 90
+)
+または、低層雲量だけを簡単に表示します。
+
+python
+low_cloud_status = (
+    "雲海/ガス注意" if cloud_cover_low >= 50 else "低層雲少"
+)
+ただし、低層雲量50%以上は「撮影地がガスる」ことを意味しません。標高2,000 mの地点では、見事な雲海であることもあります。最終的には山頂・山麓のライブカメラ、衛星画像、現地の露点差・風で確認してください。
+
+まず採用するルール
+最初の実装としては、次がバランスよいと思います。
+
+python
+def classify_aloft_cloud(mid, high):
+    aloft = 100 * (1 - (1 - mid / 100) * (1 - high / 100))
+
+    if aloft >= 50 or high >= 50:
+        return aloft, "Red"
+    if aloft >= 30 or high >= 30:
+        return aloft, "Yellow"
+    return aloft, "Green"
+予報には誤差があり、雲の重なりも未知なので、Greenを「必ず快晴」ではなく、遠征・観測の有望候補として扱うのが適切です。実際の遠征結果を保存すれば、「Greenなのに高層薄雲で失敗した」事例を蓄積して、例えば高層雲のYellow閾値を25%へ下げる、といった地点・撮影対象に合わせた調整ができます
