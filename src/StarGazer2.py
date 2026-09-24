@@ -1,5 +1,5 @@
-# Stargazer2 260923(1)
-# コミットメッセージ: 通信タイムアウト時の再送信（最大2回リトライ）および通信エラー中断ダイアログの実装
+# Stargazer2 260924
+# コミットメッセージ: 旧バージョンファイル（StarGazer004d.py, locationsA.json）のV1フォルダーへの整理および構想資料の追加
 
 import tkinter as tk
 from tkinter import ttk, messagebox

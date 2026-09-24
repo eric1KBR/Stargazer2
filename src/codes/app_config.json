@@ -1,7 +1,7 @@
 {
   "geometry": "1447x1302+550+37",
   "view_mode": "3h",
-  "cloud_mode": "elevation",
+  "cloud_mode": "total",
   "wind_threshold": 5.0,
   "elevation_threshold": 1500
 }
