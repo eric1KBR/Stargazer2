@@ -1,5 +1,5 @@
-# Stargazer2 260926(6)
-# コミットメッセージ: 雲量数値のフォントサイズ調整（通常地点: 12pt、標高考慮地点: 標高10pt / 総雲量12pt）の実装
+# Stargazer2 260926(7)
+# コミットメッセージ: 雲量数値の文字色をV1準拠（良: #ECECEC, 可: #6F6F6F, 不可: #111111）に変更
 
 import tkinter as tk
 from tkinter import ttk, messagebox

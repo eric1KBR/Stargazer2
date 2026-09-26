@@ -215,8 +215,8 @@ class WeatherGrid:
 
                 if is_split:
                     # --- 標高考慮対象地点：左右2分割表示 (左: 標高考慮 / 右: 総雲量) ---
-                    elev_bg, _, elev_alert_fg = get_status_colors(cell.elevation_status)
-                    total_bg, _, total_alert_fg = get_status_colors(cell.total_status)
+                    elev_bg, elev_text_fg, elev_alert_fg = get_status_colors(cell.elevation_status)
+                    total_bg, total_text_fg, total_alert_fg = get_status_colors(cell.total_status)
                     half_w = CELL_WIDTH / 2
 
                     # 左半分（標高考慮）
@@ -235,23 +235,17 @@ class WeatherGrid:
                         fill="", outline=COLORS["border"]
                     )
 
-                    # 上段：雲量 (標高考慮: 10pt / 総雲量: 12pt の中央揃え並記)
+                    # 上段：雲量 (標高考慮: 10pt / 総雲量: 12pt の中央揃え並記、各背景色のV1文字色を適用)
                     elev_str = str(cell.elevation_val) if cell.elevation_val is not None else "--"
                     total_str = str(cell.total_val) if cell.total_val is not None else "--"
 
-                    # 背景の明度に応じた文字色（両方グレーの場合は白文字、それ以外は濃色文字）
-                    if cell.elevation_status == "poor" and cell.total_status == "poor":
-                        text_fg = COLORS["text_poor"]
-                    else:
-                        text_fg = COLORS["text_good"]
-
-                    # 10pt ("83 / ") と 12pt ("97") を連結して中央揃え
+                    # 10pt ("83 / ") は左背景色、12pt ("97") は右背景色に応じた文字色で中央揃え連結
                     t1 = self.main_canvas.create_text(
-                        0, 0, text=f"{elev_str} / ", fill=text_fg,
+                        0, 0, text=f"{elev_str} / ", fill=elev_text_fg,
                         font=("Arial", 10, "bold"), anchor="w"
                     )
                     t2 = self.main_canvas.create_text(
-                        0, 0, text=total_str, fill=text_fg,
+                        0, 0, text=total_str, fill=total_text_fg,
                         font=("Arial", 12, "bold"), anchor="w"
                     )
                     b1 = self.main_canvas.bbox(t1)

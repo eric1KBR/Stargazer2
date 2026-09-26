@@ -4,7 +4,7 @@
 import os
 
 # --- アプリケーション情報 ---
-APP_TITLE = "Stargazer2 260926(6)"
+APP_TITLE = "Stargazer2 260926(7)"
 
 # --- 通信・リトライ設定 ---
 MAX_API_RETRIES = 2        # 失敗時の最大再試行回数（計3回試行）
@@ -38,10 +38,10 @@ COLORS = {
     "status_fair": "#c8b13c",     # 可 (30-50%): イエロー rgb(200, 177, 60)
     "status_poor": "#64748b",     # 不可 (>=50%): グレー
 
-    # セル内基本文字色（雲量数値用）
-    "text_good": "#0f172a",       # スカイブルー背景上の濃い文字
-    "text_fair": "#0f172a",       # イエロー背景上の濃い文字
-    "text_poor": "#f8fafc",       # グレー背景上の白系文字
+    # セル内基本文字色（雲量数値用：V1準拠）
+    "text_good": "#ECECEC",       # スカイブルー背景上の白系文字 (V1: cloud_text_0_15)
+    "text_fair": "#6F6F6F",       # イエロー背景上のグレー文字 (V1: cloud_text_25_35)
+    "text_poor": "#111111",       # グレー背景上の濃い黒文字 (V1: cloud_text_over)
     "text_nodata": "#94a3b8",     # データなし時の薄い文字
 
     # 警告文字色（風速・霧用: 明るい赤）
