@@ -235,10 +235,9 @@ class WeatherGrid:
                         fill="", outline=COLORS["border"]
                     )
 
-                    # 上段：雲量 (35 / 70 の併記表示)
+                    # 上段：雲量 (標高考慮: 10pt / 総雲量: 12pt の中央揃え並記)
                     elev_str = str(cell.elevation_val) if cell.elevation_val is not None else "--"
                     total_str = str(cell.total_val) if cell.total_val is not None else "--"
-                    combined_text = f"{elev_str} / {total_str}"
 
                     # 背景の明度に応じた文字色（両方グレーの場合は白文字、それ以外は濃色文字）
                     if cell.elevation_status == "poor" and cell.total_status == "poor":
@@ -246,11 +245,23 @@ class WeatherGrid:
                     else:
                         text_fg = COLORS["text_good"]
 
-                    self.main_canvas.create_text(
-                        x + CELL_WIDTH / 2, y + 18,
-                        text=combined_text, fill=text_fg,
-                        font=("Arial", 10, "bold")
+                    # 10pt ("83 / ") と 12pt ("97") を連結して中央揃え
+                    t1 = self.main_canvas.create_text(
+                        0, 0, text=f"{elev_str} / ", fill=text_fg,
+                        font=("Arial", 10, "bold"), anchor="w"
                     )
+                    t2 = self.main_canvas.create_text(
+                        0, 0, text=total_str, fill=text_fg,
+                        font=("Arial", 12, "bold"), anchor="w"
+                    )
+                    b1 = self.main_canvas.bbox(t1)
+                    b2 = self.main_canvas.bbox(t2)
+                    w1 = (b1[2] - b1[0]) if b1 else 28
+                    w2 = (b2[2] - b2[0]) if b2 else 20
+                    total_w = w1 + w2
+                    start_x = x + (CELL_WIDTH - total_w) / 2
+                    self.main_canvas.coords(t1, start_x, y + 18)
+                    self.main_canvas.coords(t2, start_x + w1, y + 18)
 
                     # 下段：左に風速（数字のみ）、右に霧（漢字のみ）
                     if cell.wind_text:
@@ -293,11 +304,11 @@ class WeatherGrid:
                         fill=cell_bg, outline=COLORS["border"]
                     )
 
-                    # 上段：雲量（数字のみ）
+                    # 上段：雲量（数字のみ、12pt）
                     self.main_canvas.create_text(
                         x + CELL_WIDTH / 2, y + 18,
                         text=val_str, fill=text_fg,
-                        font=("Arial", 11, "bold")
+                        font=("Arial", 12, "bold")
                     )
 
                     # 下段：左に風速（数字のみ）、右に霧（漢字のみ）

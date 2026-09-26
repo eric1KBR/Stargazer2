@@ -4,7 +4,7 @@
 import os
 
 # --- アプリケーション情報 ---
-APP_TITLE = "Stargazer2 260926(5)"
+APP_TITLE = "Stargazer2 260926(6)"
 
 # --- 通信・リトライ設定 ---
 MAX_API_RETRIES = 2        # 失敗時の最大再試行回数（計3回試行）

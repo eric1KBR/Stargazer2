@@ -1,5 +1,5 @@
-# Stargazer2 260926(5)
-# コミットメッセージ: 地点管理ダイアログを「地点管理」ボタン直下に表示する位置調整の実装
+# Stargazer2 260926(6)
+# コミットメッセージ: 雲量数値のフォントサイズ調整（通常地点: 12pt、標高考慮地点: 標高10pt / 総雲量12pt）の実装
 
 import tkinter as tk
 from tkinter import ttk, messagebox
