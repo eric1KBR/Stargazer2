@@ -1,5 +1,5 @@
-# Stargazer2 260926(10)
-# コミットメッセージ: 標高考慮地点にて総雲量が不可でも標高考慮が可・良の場合は風・霧警告を表示するよう条件修正
+# Stargazer2 260926(11)
+# コミットメッセージ: 標高考慮モードの雲量計算および評価仕様ドキュメント（標高考慮モード評価内容.md）の追加
 
 import tkinter as tk
 from tkinter import ttk, messagebox
