@@ -197,7 +197,8 @@ class WeatherGrid:
                 loc_cache = cache.get(loc.id, {})
                 cell = loc_cache.get(t_iso)
 
-                is_split = (cell is not None and cell.is_high_altitude and cloud_mode == "elevation")
+                # 標高考慮対象地点は常に左右2色分割（左: 標高考慮 / 右: 総雲量）
+                is_split = (cell is not None and cell.is_high_altitude)
 
                 def get_status_colors(stat: str):
                     if stat == "good":
@@ -210,9 +211,9 @@ class WeatherGrid:
                         return COLORS["bg"], COLORS["text_nodata"], COLORS["alert_poor"]
 
                 if is_split:
-                    # --- 標高考慮対象地点：左右2分割表示 (左: 標高考慮 / 右: 全層雲量) ---
-                    elev_bg, elev_text_fg, elev_alert_fg = get_status_colors(cell.elevation_status)
-                    total_bg, total_text_fg, total_alert_fg = get_status_colors(cell.total_status)
+                    # --- 標高考慮対象地点：左右2分割表示 (左: 標高考慮 / 右: 総雲量) ---
+                    elev_bg, _, elev_alert_fg = get_status_colors(cell.elevation_status)
+                    total_bg, _, total_alert_fg = get_status_colors(cell.total_status)
                     half_w = CELL_WIDTH / 2
 
                     # 左半分（標高考慮）
@@ -220,7 +221,7 @@ class WeatherGrid:
                         x, y, x + half_w, y + CELL_HEIGHT,
                         fill=elev_bg, outline=""
                     )
-                    # 右半分（全層雲量）
+                    # 右半分（総雲量）
                     self.main_canvas.create_rectangle(
                         x + half_w, y, x + CELL_WIDTH, y + CELL_HEIGHT,
                         fill=total_bg, outline=""
@@ -236,23 +237,20 @@ class WeatherGrid:
                         fill="", outline=COLORS["border"]
                     )
 
-                    # 上段：雲量 (標高考慮 / 全層雲量)
+                    # 上段：雲量 (35 / 70 の併記表示)
                     elev_str = str(cell.elevation_val) if cell.elevation_val is not None else "--"
                     total_str = str(cell.total_val) if cell.total_val is not None else "--"
+                    combined_text = f"{elev_str} / {total_str}"
+
+                    # 背景の明度に応じた文字色（両方グレーの場合は白文字、それ以外は濃色文字）
+                    if cell.elevation_status == "poor" and cell.total_status == "poor":
+                        text_fg = COLORS["text_poor"]
+                    else:
+                        text_fg = COLORS["text_good"]
 
                     self.main_canvas.create_text(
-                        x + half_w * 0.5, y + 18,
-                        text=elev_str, fill=elev_text_fg,
-                        font=("Arial", 10, "bold")
-                    )
-                    self.main_canvas.create_text(
-                        x + half_w, y + 18,
-                        text="/", fill="#1e293b",
-                        font=("Arial", 9, "bold")
-                    )
-                    self.main_canvas.create_text(
-                        x + half_w + half_w * 0.5, y + 18,
-                        text=total_str, fill=total_text_fg,
+                        x + CELL_WIDTH / 2, y + 18,
+                        text=combined_text, fill=text_fg,
                         font=("Arial", 10, "bold")
                     )
 
