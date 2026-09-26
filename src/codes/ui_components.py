@@ -32,6 +32,8 @@ class WeatherGrid:
 
         # 現在描画されている行の時刻リスト
         self.displayed_times: List[str] = []
+        # 現在開いている詳細ダイアログの参照
+        self.current_detail_dlg: Optional[tk.Toplevel] = None
 
         self.setup_ui()
 
@@ -67,6 +69,7 @@ class WeatherGrid:
         )
         self.main_canvas.grid(row=1, column=1, sticky="nsew")
         self.main_canvas.bind("<Button-1>", self.on_cell_click)
+        self.main_canvas.bind("<Double-Button-1>", self.on_cell_double_click)
 
         # スクロールバー
         self.vsb = ttk.Scrollbar(self.grid_frame, orient="vertical", command=self.on_vsb_scroll)
@@ -313,7 +316,7 @@ class WeatherGrid:
                         )
 
     def on_cell_click(self, event):
-        """セルクリック時に詳細ダイアログを表示"""
+        """セルクリック時に詳細ダイアログを表示（マウスカーソル近傍に配置）"""
         # キャンバスのスクロールオフセットを考慮した座標取得
         canvas_x = self.main_canvas.canvasx(event.x)
         canvas_y = self.main_canvas.canvasy(event.y)
@@ -332,4 +335,26 @@ class WeatherGrid:
 
         raw_data = cell.raw_data if cell else {}
         if raw_data:
-            show_detail_dialog(self.root, loc, t_iso, raw_data)
+            # 既存の詳細ダイアログがあれば破棄
+            if self.current_detail_dlg is not None:
+                try:
+                    if self.current_detail_dlg.winfo_exists():
+                        self.current_detail_dlg.destroy()
+                except:
+                    pass
+                self.current_detail_dlg = None
+
+            # カーソル絶対座標を渡して開く
+            self.current_detail_dlg = show_detail_dialog(
+                self.root, loc, t_iso, raw_data, mouse_pos=(event.x_root, event.y_root)
+            )
+
+    def on_cell_double_click(self, event):
+        """セル上でダブルクリックされた場合に開いているダイアログを閉じる"""
+        if self.current_detail_dlg is not None:
+            try:
+                if self.current_detail_dlg.winfo_exists():
+                    self.current_detail_dlg.destroy()
+            except:
+                pass
+            self.current_detail_dlg = None

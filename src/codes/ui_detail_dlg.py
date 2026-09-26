@@ -3,7 +3,7 @@
 
 import tkinter as tk
 from tkinter import ttk
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, Tuple
 from .config import COLORS
 from .models import Location
 from .weather_analyzer import classify_aloft_cloud, classify_fog_level
@@ -20,14 +20,49 @@ def degree_to_compass(deg: Optional[float]) -> str:
     return COMPASS_DIRECTIONS[val % 16]
 
 
-def show_detail_dialog(parent: tk.Tk, loc: Location, time_iso: str, raw: Dict[str, Any]):
-    """セル詳細情報を表示するモーダルダイアログ"""
+def show_detail_dialog(
+    parent: tk.Tk,
+    loc: Location,
+    time_iso: str,
+    raw: Dict[str, Any],
+    mouse_pos: Optional[Tuple[int, int]] = None
+) -> tk.Toplevel:
+    """セル詳細情報を表示するダイアログ（カーソル近傍配置＆ダブルクリック対応）"""
     dlg = tk.Toplevel(parent)
     dlg.title(f"{loc.name} - 詳細予報")
-    dlg.geometry("420x480")
     dlg.configure(bg=COLORS["bg"])
     dlg.transient(parent)
-    dlg.grab_set()
+
+    dlg_w = 420
+    dlg_h = 480
+
+    if mouse_pos:
+        mx, my = mouse_pos
+        screen_w = dlg.winfo_screenwidth()
+        screen_h = dlg.winfo_screenheight()
+
+        offset_x = 15
+        offset_y = 10
+        x = mx + offset_x
+        y = my + offset_y
+
+        # 右側のはみ出し防止（はみ出る場合はカーソル左側へ）
+        if x + dlg_w > screen_w - 10:
+            x = mx - dlg_w - offset_x
+            if x < 10:
+                x = max(10, screen_w - dlg_w - 10)
+
+        # 下側のはみ出し防止（タスクバー等を考慮してカーソル上側へ）
+        if y + dlg_h > screen_h - 50:
+            y = my - dlg_h - offset_y
+            if y < 10:
+                y = max(10, screen_h - dlg_h - 50)
+
+        x = max(10, x)
+        y = max(10, y)
+        dlg.geometry(f"{dlg_w}x{dlg_h}+{int(x)}+{int(y)}")
+    else:
+        dlg.geometry(f"{dlg_w}x{dlg_h}")
 
     # タイトル部分
     header_frame = tk.Frame(dlg, bg=COLORS["header_bg"], padx=15, pady=10)
@@ -135,7 +170,23 @@ def show_detail_dialog(parent: tk.Tk, loc: Location, time_iso: str, raw: Dict[st
 
     btn_frame = tk.Frame(dlg, bg=COLORS["bg"], pady=10)
     btn_frame.pack(fill="x")
+
+    tk.Label(
+        btn_frame, text="※ダブルクリックまたはEscで閉じます",
+        bg=COLORS["bg"], fg=COLORS["text_dim"], font=("Meiryo", 8)
+    ).pack(side="left", padx=15)
+
     close_btn = ttk.Button(btn_frame, text="閉じる", command=dlg.destroy)
     close_btn.pack(side="right", padx=15)
 
     dlg.bind("<Escape>", lambda e: dlg.destroy())
+
+    # ダイアログ内のどこをダブルクリックしても閉じるように全ウィジェットにバインド
+    def bind_double_click_close(widget):
+        widget.bind("<Double-Button-1>", lambda e: dlg.destroy())
+        for child in widget.winfo_children():
+            bind_double_click_close(child)
+
+    bind_double_click_close(dlg)
+
+    return dlg

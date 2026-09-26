@@ -1,5 +1,5 @@
-# Stargazer2 260926(3)
-# コミットメッセージ: 可（イエロー）判定のセル描画色を中間明度の rgb(200, 177, 60) (#c8b13c) に変更
+# Stargazer2 260926(4)
+# コミットメッセージ: 詳細ダイアログのマウスカーソル近傍配置（画面外はみ出し防止）およびダブルクリックによる閉じる機能の実装
 
 import tkinter as tk
 from tkinter import ttk, messagebox
