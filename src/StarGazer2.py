@@ -1,5 +1,5 @@
-# Stargazer2 260926(7)
-# コミットメッセージ: 雲量数値の文字色をV1準拠（良: #ECECEC, 可: #6F6F6F, 不可: #111111）に変更
+# Stargazer2 260926(8)
+# コミットメッセージ: 日時サイドバーの日付フォントサイズを10ptに変更（セル高さ維持）
 
 import tkinter as tk
 from tkinter import ttk, messagebox

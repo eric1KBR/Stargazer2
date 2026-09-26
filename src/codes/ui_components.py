@@ -183,10 +183,10 @@ class WeatherGrid:
                 0, y, SIDEBAR_WIDTH, y + CELL_HEIGHT,
                 fill=bg_sidebar, outline=COLORS["border"]
             )
-            # 日付 (月/日)
+            # 日付 (月/日: 10pt)
             self.sidebar_canvas.create_text(
                 SIDEBAR_WIDTH / 2, y + 16,
-                text=f"{dt.month}/{dt.day}", fill=fg_date, font=("Arial", 8)
+                text=f"{dt.month}/{dt.day}", fill=fg_date, font=("Arial", 10)
             )
             # 時刻 (時:分)
             self.sidebar_canvas.create_text(
