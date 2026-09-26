@@ -4,7 +4,7 @@
 import os
 
 # --- アプリケーション情報 ---
-APP_TITLE = "Stargazer2 260926(2)"
+APP_TITLE = "Stargazer2 260926(3)"
 
 # --- 通信・リトライ設定 ---
 MAX_API_RETRIES = 2        # 失敗時の最大再試行回数（計3回試行）
@@ -35,7 +35,7 @@ COLORS = {
 
     # 判定背景色
     "status_good": "#38bdf8",     # 良 (<30%): スカイブルー
-    "status_fair": "#fde047",     # 可 (30-50%): イエロー
+    "status_fair": "#c8b13c",     # 可 (30-50%): イエロー rgb(200, 177, 60)
     "status_poor": "#64748b",     # 不可 (>=50%): グレー
 
     # セル内基本文字色（雲量数値用）

@@ -1,5 +1,5 @@
-# Stargazer2 260926(2)
-# コミットメッセージ: セル内中央縦線の削除、および標高考慮雲量の上限ガード（左: 標高考慮 <= 右: 総雲量）による左右表示整合の徹底
+# Stargazer2 260926(3)
+# コミットメッセージ: 可（イエロー）判定のセル描画色を中間明度の rgb(200, 177, 60) (#c8b13c) に変更
 
 import tkinter as tk
 from tkinter import ttk, messagebox
