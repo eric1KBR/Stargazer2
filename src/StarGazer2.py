@@ -1,5 +1,5 @@
-# Stargazer2 260924
-# コミットメッセージ: 旧バージョンファイル（StarGazer004d.py, locationsA.json）のV1フォルダーへの整理および構想資料の追加
+# Stargazer2 260926
+# コミットメッセージ: 標高考慮対象地点における「標高考慮/全層雲量」のセル左右2色分割表示および数値並記（35 / 70）の実装
 
 import tkinter as tk
 from tkinter import ttk, messagebox
@@ -180,7 +180,8 @@ class StarGazer2App:
         tk.Label(legend_frame, text="■良", bg=COLORS["header_bg"], fg=COLORS["status_good"], font=("Meiryo", 8, "bold")).pack(side="left", padx=2)
         tk.Label(legend_frame, text="■可", bg=COLORS["header_bg"], fg=COLORS["status_fair"], font=("Meiryo", 8, "bold")).pack(side="left", padx=2)
         tk.Label(legend_frame, text="■不可", bg=COLORS["header_bg"], fg=COLORS["status_poor"], font=("Meiryo", 8, "bold")).pack(side="left", padx=2)
-        tk.Label(legend_frame, text="(赤字: 強風/霧)", bg=COLORS["header_bg"], fg=COLORS["danger"], font=("Meiryo", 8)).pack(side="left", padx=4)
+        tk.Label(legend_frame, text="[高地: 標高/全層]", bg=COLORS["header_bg"], fg=COLORS["accent"], font=("Meiryo", 8)).pack(side="left", padx=4)
+        tk.Label(legend_frame, text="(赤字: 強風/霧)", bg=COLORS["header_bg"], fg=COLORS["danger"], font=("Meiryo", 8)).pack(side="left", padx=2)
 
         # 右側: 更新ボタン ＆ 最終更新日時 ＆ ステータス
         self.update_btn = ttk.Button(

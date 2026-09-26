@@ -87,7 +87,7 @@ def precompute_location_data(
         else:
             raw = {}
 
-        cell = CellPrecomputed(raw_data=raw)
+        cell = CellPrecomputed(raw_data=raw, is_high_altitude=is_high_altitude)
         
         # 総雲量
         tot = raw.get("cloud_cover")

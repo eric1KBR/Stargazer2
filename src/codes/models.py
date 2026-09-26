@@ -35,6 +35,8 @@ class Location:
 @dataclass
 class CellPrecomputed:
     """描画高速化のために事前計算されたセル情報"""
+    is_high_altitude: bool = False  # 標高考慮対象地点かどうか
+
     # 標高考慮モード用
     elevation_val: Optional[int] = None
     elevation_status: str = "none"  # "good", "fair", "poor", "none"

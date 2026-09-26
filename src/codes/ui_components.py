@@ -197,69 +197,127 @@ class WeatherGrid:
                 loc_cache = cache.get(loc.id, {})
                 cell = loc_cache.get(t_iso)
 
-                val_str = "--"
-                status = "none"
-                wind_txt = ""
-                fog_txt = ""
+                is_split = (cell is not None and cell.is_high_altitude and cloud_mode == "elevation")
 
-                if cell is not None:
-                    if cloud_mode == "elevation":
-                        val_num = cell.elevation_val
-                        status = cell.elevation_status
+                def get_status_colors(stat: str):
+                    if stat == "good":
+                        return COLORS["status_good"], COLORS["text_good"], COLORS["alert_good"]
+                    elif stat == "fair":
+                        return COLORS["status_fair"], COLORS["text_fair"], COLORS["alert_fair"]
+                    elif stat == "poor":
+                        return COLORS["status_poor"], COLORS["text_poor"], COLORS["alert_poor"]
                     else:
-                        val_num = cell.total_val
-                        status = cell.total_status
+                        return COLORS["bg"], COLORS["text_nodata"], COLORS["alert_poor"]
 
-                    if val_num is not None:
-                        val_str = str(val_num)
-                    wind_txt = cell.wind_text
-                    fog_txt = cell.fog_text
+                if is_split:
+                    # --- 標高考慮対象地点：左右2分割表示 (左: 標高考慮 / 右: 全層雲量) ---
+                    elev_bg, elev_text_fg, elev_alert_fg = get_status_colors(cell.elevation_status)
+                    total_bg, total_text_fg, total_alert_fg = get_status_colors(cell.total_status)
+                    half_w = CELL_WIDTH / 2
 
-                # 背景色
-                if status == "good":
-                    cell_bg = COLORS["status_good"]
-                    text_fg = COLORS["text_good"]
-                    alert_fg = COLORS["alert_good"]
-                elif status == "fair":
-                    cell_bg = COLORS["status_fair"]
-                    text_fg = COLORS["text_fair"]
-                    alert_fg = COLORS["alert_fair"]
-                elif status == "poor":
-                    cell_bg = COLORS["status_poor"]
-                    text_fg = COLORS["text_poor"]
-                    alert_fg = COLORS["alert_poor"]
-                else:
-                    cell_bg = COLORS["bg"]
-                    text_fg = COLORS["text_nodata"]
-                    alert_fg = COLORS["alert_poor"]
+                    # 左半分（標高考慮）
+                    self.main_canvas.create_rectangle(
+                        x, y, x + half_w, y + CELL_HEIGHT,
+                        fill=elev_bg, outline=""
+                    )
+                    # 右半分（全層雲量）
+                    self.main_canvas.create_rectangle(
+                        x + half_w, y, x + CELL_WIDTH, y + CELL_HEIGHT,
+                        fill=total_bg, outline=""
+                    )
+                    # 中央境界線
+                    self.main_canvas.create_line(
+                        x + half_w, y, x + half_w, y + CELL_HEIGHT,
+                        fill=COLORS["border"], width=1
+                    )
+                    # セル外枠
+                    self.main_canvas.create_rectangle(
+                        x, y, x + CELL_WIDTH, y + CELL_HEIGHT,
+                        fill="", outline=COLORS["border"]
+                    )
 
-                # 背景長方形
-                self.main_canvas.create_rectangle(
-                    x, y, x + CELL_WIDTH, y + CELL_HEIGHT,
-                    fill=cell_bg, outline=COLORS["border"]
-                )
+                    # 上段：雲量 (標高考慮 / 全層雲量)
+                    elev_str = str(cell.elevation_val) if cell.elevation_val is not None else "--"
+                    total_str = str(cell.total_val) if cell.total_val is not None else "--"
 
-                # 上段：雲量（数字のみ）
-                self.main_canvas.create_text(
-                    x + CELL_WIDTH / 2, y + 18,
-                    text=val_str, fill=text_fg,
-                    font=("Arial", 11, "bold")
-                )
-
-                # 下段：左に風速（数字のみ）、右に霧（漢字のみ）
-                if wind_txt:
                     self.main_canvas.create_text(
-                        x + 22, y + 38,
-                        text=wind_txt, fill=alert_fg,
+                        x + half_w * 0.5, y + 18,
+                        text=elev_str, fill=elev_text_fg,
+                        font=("Arial", 10, "bold")
+                    )
+                    self.main_canvas.create_text(
+                        x + half_w, y + 18,
+                        text="/", fill="#1e293b",
                         font=("Arial", 9, "bold")
                     )
-
-                if fog_txt:
                     self.main_canvas.create_text(
-                        x + CELL_WIDTH - 22, y + 38,
-                        text=fog_txt, fill=alert_fg,
-                        font=("Meiryo", 9, "bold")
+                        x + half_w + half_w * 0.5, y + 18,
+                        text=total_str, fill=total_text_fg,
+                        font=("Arial", 10, "bold")
                     )
+
+                    # 下段：左に風速（数字のみ）、右に霧（漢字のみ）
+                    if cell.wind_text:
+                        self.main_canvas.create_text(
+                            x + 20, y + 38,
+                            text=cell.wind_text, fill=elev_alert_fg,
+                            font=("Arial", 9, "bold")
+                        )
+                    if cell.fog_text:
+                        self.main_canvas.create_text(
+                            x + CELL_WIDTH - 20, y + 38,
+                            text=cell.fog_text, fill=total_alert_fg,
+                            font=("Meiryo", 9, "bold")
+                        )
+                else:
+                    # --- 通常地点または総雲量モード：単色表示 ---
+                    val_str = "--"
+                    status = "none"
+                    wind_txt = ""
+                    fog_txt = ""
+
+                    if cell is not None:
+                        if cloud_mode == "elevation":
+                            val_num = cell.elevation_val
+                            status = cell.elevation_status
+                        else:
+                            val_num = cell.total_val
+                            status = cell.total_status
+
+                        if val_num is not None:
+                            val_str = str(val_num)
+                        wind_txt = cell.wind_text
+                        fog_txt = cell.fog_text
+
+                    cell_bg, text_fg, alert_fg = get_status_colors(status)
+
+                    # 背景長方形
+                    self.main_canvas.create_rectangle(
+                        x, y, x + CELL_WIDTH, y + CELL_HEIGHT,
+                        fill=cell_bg, outline=COLORS["border"]
+                    )
+
+                    # 上段：雲量（数字のみ）
+                    self.main_canvas.create_text(
+                        x + CELL_WIDTH / 2, y + 18,
+                        text=val_str, fill=text_fg,
+                        font=("Arial", 11, "bold")
+                    )
+
+                    # 下段：左に風速（数字のみ）、右に霧（漢字のみ）
+                    if wind_txt:
+                        self.main_canvas.create_text(
+                            x + 22, y + 38,
+                            text=wind_txt, fill=alert_fg,
+                            font=("Arial", 9, "bold")
+                        )
+
+                    if fog_txt:
+                        self.main_canvas.create_text(
+                            x + CELL_WIDTH - 22, y + 38,
+                            text=fog_txt, fill=alert_fg,
+                            font=("Meiryo", 9, "bold")
+                        )
 
     def on_cell_click(self, event):
         """セルクリック時に詳細ダイアログを表示"""
