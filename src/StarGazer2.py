@@ -1,5 +1,5 @@
-# Stargazer2 260926(4)
-# コミットメッセージ: 詳細ダイアログのマウスカーソル近傍配置（画面外はみ出し防止）およびダブルクリックによる閉じる機能の実装
+# Stargazer2 260926(5)
+# コミットメッセージ: 地点管理ダイアログを「地点管理」ボタン直下に表示する位置調整の実装
 
 import tkinter as tk
 from tkinter import ttk, messagebox
@@ -147,11 +147,10 @@ class StarGazer2App:
         self.count_lbl = ttk.Label(
             control_frame, text=f"観測地点 ({len(self.locations)})", font=("Meiryo", 9)
         )
-        self.count_lbl.pack(side="left", padx=(0, 6))
-
-        ttk.Button(
+        self.btn_location_manager = ttk.Button(
             control_frame, text="地点管理...", command=self.open_location_manager
-        ).pack(side="left", padx=4)
+        )
+        self.btn_location_manager.pack(side="left", padx=4)
 
         # 区切り
         ttk.Separator(control_frame, orient="vertical").pack(side="left", fill="y", padx=8, pady=2)
@@ -265,7 +264,9 @@ class StarGazer2App:
             self.count_lbl.config(text=f"観測地点 ({len(self.locations)})")
             self.rebuild_cache_and_render()
 
-        LocationManagerDialog(self.root, self.locations, on_locations_saved)
+        LocationManagerDialog(
+            self.root, self.locations, on_locations_saved, btn_widget=self.btn_location_manager
+        )
 
     # --- データ取得・更新処理 ---
 

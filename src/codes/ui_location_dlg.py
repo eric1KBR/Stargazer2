@@ -10,13 +10,41 @@ from .models import Location
 from .api_client import fetch_elevation
 
 class LocationManagerDialog:
-    def __init__(self, parent: tk.Tk, locations: List[Location], on_save: Callable[[List[Location]], None]):
+    def __init__(
+        self,
+        parent: tk.Tk,
+        locations: List[Location],
+        on_save: Callable[[List[Location]], None],
+        btn_widget: Optional[tk.Widget] = None
+    ):
         self.dlg = tk.Toplevel(parent)
         self.dlg.title("観測地点の管理")
-        self.dlg.geometry("540x560")
         self.dlg.configure(bg=COLORS["bg"])
         self.dlg.transient(parent)
         self.dlg.grab_set()
+
+        dlg_w = 540
+        dlg_h = 560
+
+        if btn_widget is not None:
+            btn_widget.update_idletasks()
+            bx = btn_widget.winfo_rootx()
+            by = btn_widget.winfo_rooty() + btn_widget.winfo_height() + 6
+
+            screen_w = self.dlg.winfo_screenwidth()
+            screen_h = self.dlg.winfo_screenheight()
+
+            # 画面端はみ出し防止
+            if bx + dlg_w > screen_w - 10:
+                bx = max(10, screen_w - dlg_w - 10)
+            if by + dlg_h > screen_h - 50:
+                by = max(10, screen_h - dlg_h - 50)
+
+            bx = max(10, bx)
+            by = max(10, by)
+            self.dlg.geometry(f"{dlg_w}x{dlg_h}+{int(bx)}+{int(by)}")
+        else:
+            self.dlg.geometry(f"{dlg_w}x{dlg_h}")
 
         # 編集用ローカルコピー
         self.locations: List[Location] = [Location.from_dict(loc.to_dict()) for loc in locations]
