@@ -71,6 +71,8 @@ def show_detail_dialog(parent: tk.Tk, loc: Location, time_iso: str, raw: Dict[st
     aloft_val = None
     if mid is not None and high is not None:
         aloft_val, _ = classify_aloft_cloud(float(mid), float(high))
+        if tot is not None:
+            aloft_val = min(aloft_val, float(tot))
 
     fog_lvl = classify_fog_level(temp or 0, dew or 0, hum or 0, wind_spd or 0)
     if not fog_lvl:

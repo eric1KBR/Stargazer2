@@ -226,11 +226,6 @@ class WeatherGrid:
                         x + half_w, y, x + CELL_WIDTH, y + CELL_HEIGHT,
                         fill=total_bg, outline=""
                     )
-                    # 中央境界線
-                    self.main_canvas.create_line(
-                        x + half_w, y, x + half_w, y + CELL_HEIGHT,
-                        fill=COLORS["border"], width=1
-                    )
                     # セル外枠
                     self.main_canvas.create_rectangle(
                         x, y, x + CELL_WIDTH, y + CELL_HEIGHT,

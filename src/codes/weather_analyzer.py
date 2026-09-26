@@ -100,7 +100,16 @@ def precompute_location_data(
             mid = raw.get("cloud_cover_mid", 0.0)
             high = raw.get("cloud_cover_high", 0.0)
             if mid is not None and high is not None:
-                aloft_val, status = classify_aloft_cloud(float(mid), float(high))
+                aloft_val, _ = classify_aloft_cloud(float(mid), float(high))
+                if cell.total_val is not None:
+                    aloft_val = min(aloft_val, float(cell.total_val))
+                high_val = float(high)
+                if aloft_val >= 50.0 or high_val >= 50.0:
+                    status = "poor"
+                elif aloft_val >= 30.0 or high_val >= 30.0:
+                    status = "fair"
+                else:
+                    status = "good"
                 cell.elevation_val = round(aloft_val)
                 cell.elevation_status = status
             else:
