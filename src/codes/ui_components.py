@@ -258,19 +258,20 @@ class WeatherGrid:
                     self.main_canvas.coords(t2, start_x + w1, y + 18)
 
                     # 下段：左に風速（数字のみ）、右に霧（漢字のみ）
-                    # 判定が不可（poor）の場合は警告を表示しない
-                    if cell.wind_text and cell.elevation_status != "poor":
-                        self.main_canvas.create_text(
-                            x + 20, y + 38,
-                            text=cell.wind_text, fill=elev_alert_fg,
-                            font=("Arial", 9, "bold")
-                        )
-                    if cell.fog_text and cell.total_status != "poor" and cell.elevation_status != "poor":
-                        self.main_canvas.create_text(
-                            x + CELL_WIDTH - 20, y + 38,
-                            text=cell.fog_text, fill=total_alert_fg,
-                            font=("Meiryo", 9, "bold")
-                        )
+                    # 標高考慮判定が可または良（!= "poor"）の場合、風および霧の警告を表示する
+                    if cell.elevation_status != "poor":
+                        if cell.wind_text:
+                            self.main_canvas.create_text(
+                                x + 20, y + 38,
+                                text=cell.wind_text, fill=elev_alert_fg,
+                                font=("Arial", 9, "bold")
+                            )
+                        if cell.fog_text:
+                            self.main_canvas.create_text(
+                                x + CELL_WIDTH - 20, y + 38,
+                                text=cell.fog_text, fill=total_alert_fg,
+                                font=("Meiryo", 9, "bold")
+                            )
                 else:
                     # --- 通常地点または総雲量モード：単色表示 ---
                     val_str = "--"

@@ -1,5 +1,5 @@
-# Stargazer2 260926(9)
-# コミットメッセージ: 判定が不可（poor）のセルにおける風速・霧警告の非表示化
+# Stargazer2 260926(10)
+# コミットメッセージ: 標高考慮地点にて総雲量が不可でも標高考慮が可・良の場合は風・霧警告を表示するよう条件修正
 
 import tkinter as tk
 from tkinter import ttk, messagebox
