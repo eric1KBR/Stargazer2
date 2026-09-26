@@ -258,13 +258,14 @@ class WeatherGrid:
                     self.main_canvas.coords(t2, start_x + w1, y + 18)
 
                     # 下段：左に風速（数字のみ）、右に霧（漢字のみ）
-                    if cell.wind_text:
+                    # 判定が不可（poor）の場合は警告を表示しない
+                    if cell.wind_text and cell.elevation_status != "poor":
                         self.main_canvas.create_text(
                             x + 20, y + 38,
                             text=cell.wind_text, fill=elev_alert_fg,
                             font=("Arial", 9, "bold")
                         )
-                    if cell.fog_text:
+                    if cell.fog_text and cell.total_status != "poor" and cell.elevation_status != "poor":
                         self.main_canvas.create_text(
                             x + CELL_WIDTH - 20, y + 38,
                             text=cell.fog_text, fill=total_alert_fg,
@@ -306,19 +307,21 @@ class WeatherGrid:
                     )
 
                     # 下段：左に風速（数字のみ）、右に霧（漢字のみ）
-                    if wind_txt:
-                        self.main_canvas.create_text(
-                            x + 22, y + 38,
-                            text=wind_txt, fill=alert_fg,
-                            font=("Arial", 9, "bold")
-                        )
+                    # 判定が不可（poor）の場合は警告を表示しない
+                    if status not in ("poor", "none"):
+                        if wind_txt:
+                            self.main_canvas.create_text(
+                                x + 22, y + 38,
+                                text=wind_txt, fill=alert_fg,
+                                font=("Arial", 9, "bold")
+                            )
 
-                    if fog_txt:
-                        self.main_canvas.create_text(
-                            x + CELL_WIDTH - 22, y + 38,
-                            text=fog_txt, fill=alert_fg,
-                            font=("Meiryo", 9, "bold")
-                        )
+                        if fog_txt:
+                            self.main_canvas.create_text(
+                                x + CELL_WIDTH - 22, y + 38,
+                                text=fog_txt, fill=alert_fg,
+                                font=("Meiryo", 9, "bold")
+                            )
 
     def on_cell_click(self, event):
         """セルクリック時に詳細ダイアログを表示（マウスカーソル近傍に配置）"""

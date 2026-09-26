@@ -1,5 +1,5 @@
-# Stargazer2 260926(8)
-# コミットメッセージ: 日時サイドバーの日付フォントサイズを10ptに変更（セル高さ維持）
+# Stargazer2 260926(9)
+# コミットメッセージ: 判定が不可（poor）のセルにおける風速・霧警告の非表示化
 
 import tkinter as tk
 from tkinter import ttk, messagebox
