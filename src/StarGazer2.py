@@ -1,5 +1,5 @@
-# Stargazer2 260926(11)
-# コミットメッセージ: 標高考慮モードの雲量計算および評価仕様ドキュメント（標高考慮モード評価内容.md）の追加
+# Stargazer2 260928
+# コミットメッセージ: 昼12:00欄への月齢（整数）表示機能の追加
 
 import tkinter as tk
 from tkinter import ttk, messagebox

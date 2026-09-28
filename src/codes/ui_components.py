@@ -10,6 +10,7 @@ from .config import (
 )
 from .models import Location, CellPrecomputed
 from .ui_detail_dlg import show_detail_dialog
+from .moon_phase import get_moon_age_int
 
 class WeatherGrid:
     def __init__(
@@ -183,10 +184,16 @@ class WeatherGrid:
                 0, y, SIDEBAR_WIDTH, y + CELL_HEIGHT,
                 fill=bg_sidebar, outline=COLORS["border"]
             )
-            # 日付 (月/日: 10pt)
+            # 日付 (月/日、12:00は月齢を付加: 10pt)
+            if is_noon:
+                moon_age = get_moon_age_int(dt)
+                date_txt = f"{dt.month}/{dt.day} {moon_age}"
+            else:
+                date_txt = f"{dt.month}/{dt.day}"
+
             self.sidebar_canvas.create_text(
                 SIDEBAR_WIDTH / 2, y + 16,
-                text=f"{dt.month}/{dt.day}", fill=fg_date, font=("Arial", 10)
+                text=date_txt, fill=fg_date, font=("Arial", 10)
             )
             # 時刻 (時:分)
             self.sidebar_canvas.create_text(
