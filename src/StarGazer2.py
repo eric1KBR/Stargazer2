@@ -1,5 +1,5 @@
-# Stargazer2 260928
-# コミットメッセージ: 昼12:00欄への月齢（整数）表示機能の追加
+# Stargazer2 260928(1)
+# コミットメッセージ: 昼12:00欄の月齢表示への括弧付加
 
 import tkinter as tk
 from tkinter import ttk, messagebox

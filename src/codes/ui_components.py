@@ -187,7 +187,7 @@ class WeatherGrid:
             # 日付 (月/日、12:00は月齢を付加: 10pt)
             if is_noon:
                 moon_age = get_moon_age_int(dt)
-                date_txt = f"{dt.month}/{dt.day} {moon_age}"
+                date_txt = f"{dt.month}/{dt.day} ({moon_age})"
             else:
                 date_txt = f"{dt.month}/{dt.day}"
 
